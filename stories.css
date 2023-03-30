@@ -1,0 +1,99 @@
+.testimonials-text {
+    color: #0f0707;
+  }
+  
+  .edit-btn {
+    color: #080404;
+  }
+  
+  .story-hero-centering {
+    position: relative;
+    top: 90px;
+  }
+  
+  .story-hero-text-even {
+    position: relative;
+    top: 4px;
+  }
+  
+  .story-hero-img-even {
+    position: relative;
+    bottom: 4px;
+  }
+  
+  .card-btn-right {
+    width: 100%;
+    text-align: right;
+  }
+  
+  .header-text-even {
+    position: relative;
+    top: 7px;
+  }
+  
+  .story-header-container {
+    min-height: 175px;
+  }
+  
+  .story-card {
+    min-height: 240px;
+  }
+  
+  .testimonial-card-tag {
+    position: relative;
+    top: 20px;
+  }
+  
+  .testimonial-img {
+    position: relative;
+    top: 15px;
+  }
+  
+  .testimonial-card-bg {
+    background: linear-gradient(-45deg, #ffffff, #ffffff, #ffffff, #ffffff);
+    background-size: 400% 400%;
+  }
+  
+  .card-body-bg {
+    background: linear-gradient(-45deg, #ffffff, rgb(255, 255, 255), #ffffff);
+    background-size: 400% 400%;
+    animation: gradient 30s ease infinite;
+  }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  .card-button {
+    font-size: 12px;
+  }
+  
+  .card-button-right {
+    position: relative;
+    left: 12px;
+  }
+  
+  .card-img-top {
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+  }
+  
+  .form-img-even {
+    position: relative;
+    bottom: 2px;
+  }
+  
+  .form-text- {
+    position: relative;
+    top: 1px;
+  }
+  
