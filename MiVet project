@@ -1,0 +1,262 @@
+import React, { useEffect, useState } from "react";
+import TestimonialContent from "./TestimonialContent";
+import TestimonialSection from "./TestimonialSection";
+import ShareStoryCollage from "./ShareStoryCollage";
+import ShareStoryHeading from "./ShareStoryHeading";
+import ShareStoryForm from "./ShareStoryForm";
+import PropTypes from "prop-types";
+import debug from "sabio-debug";
+import toastr from "toastr";
+import storiesService from "../../services/storiesService";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import "./stories.css";
+import { Card } from "react-bootstrap";
+import { shareStoryFormSchema } from "schemas/shareStoryFormSchema";
+import FileUpload from "components/fileUpload/FileUpload";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+const _logger = debug.extend("ShareStory");
+
+const onCkChange = (setFieldValue, event, editor) => {
+   _logger(event);
+   const data = editor.getData();
+   setFieldValue("story", data);
+};
+
+const ShareStory = (props) => {
+   const user = props.currentUser.roles;
+
+   const [onStoryPage] = useState({
+      pageIndex: 0,
+      pageSize: 4,
+   });
+
+   const [formInfo, setFormInfo] = useState({
+      name: "",
+      email: "",
+      story: "",
+      fileIds: [],
+   });
+
+   useEffect(() => {
+      _logger("mapping", onStoryPage);
+      storiesService
+         .getAllStorys(onStoryPage.pageIndex, onStoryPage.pageSize)
+         .then(onStorySuccess)
+         .catch(onStoryError);
+   }, []);
+
+   const onStorySuccess = () => {
+      toastr.success("Thank you for sending your story");
+   };
+
+   const onStoryError = () => {
+      toastr.error("Story sent failed");
+   };
+   const onSubmitHandler = (files, setFieldValue) => {
+      _logger("getImageDate", files);
+      const image = files[0];
+      setFieldValue("primaryImage", image.url);
+      setFormInfo((prevState) => {
+         const fd = { ...prevState };
+         const ids = files.map((file) => file.id);
+         fd.fileIds.push(...ids);
+         return fd;
+      });
+   };
+
+   const renderImage = (values) => {
+      _logger("image done", values);
+      return (
+         <React.Fragment>
+            <span className="mb-3 mt-5 ms-23">Image Preview</span>
+            <span className="mb-3">
+               <img
+                  className="product-img-uploaded ms-22 mt-1"
+                  src={values.primaryImage}
+                  alt="uploaded img"
+                  width="30%"
+               ></img>
+            </span>
+         </React.Fragment>
+      );
+   };
+   const handleSubmit = (values) => {
+      _logger("Submit Click", values);
+      storiesService.addStory(values).then(onStorySuccess).catch(onStoryError);
+   };
+   const _logger = debug.extend("Story");
+
+   return (
+      <React.Fragment>
+         <div className="bg-light shadow-none bg-colors-gradient">
+            <ShareStoryHeading />
+            <ShareStoryCollage />
+            <TestimonialContent />
+            <div>
+               <div className="form">
+                  <Formik
+                     enableReinitialize={true}
+                     initialValues={formInfo}
+                     onSubmit={handleSubmit}
+                     validationSchema={shareStoryFormSchema}
+                  >
+                     {({ values, setFieldValue }) => (
+                        <Form>
+                           <div className="row  mb-3">
+                              {/* name  */}
+                              <div className="col col-md-6 col-sm-12">
+                                 <label htmlFor="name"> Name:*</label>
+
+                                 <Field
+                                    type="text"
+                                    name="name"
+                                    data={formInfo.name}
+                                    className="form-control"
+                                    placeholder=" Name"
+                                    required
+                                 />
+                                 <ErrorMessage
+                                    name="name"
+                                    component="div"
+                                    className="has-error"
+                                 />
+                              </div>
+
+                              {/* email  */}
+                              <div className="col col-md-6 col-sm-12">
+                                 <label htmlFor="email">Email:*</label>
+                                 <div className="col-md-6 col-sm-12"></div>
+                                 <Field
+                                    type="email"
+                                    name="email"
+                                    data={formInfo.email}
+                                    className="form-control"
+                                    placeholder="Email"
+                                    required
+                                 />
+                                 <ErrorMessage
+                                    name="email"
+                                    component="div"
+                                    className="has-error"
+                                 />
+                              </div>
+                           </div>
+
+                           <Card className="bg-light shadow-none bg-colors-gradient">
+                              <Card.Body>
+                                 <div className="form-group mb-3">
+                                    <label htmlFor="story" className="mb-2">
+                                       Tell Your Story
+                                    </label>
+                                    <CKEditor
+                                       className="ck-editor__editable_inline"
+                                       editor={ClassicEditor}
+                                       id="story"
+                                       name="story"
+                                       data={formInfo.story}
+                                       onReady={(editor) => {
+                                          editor.editing.view.change((writer) => {
+                                             writer.setStyle(
+                                                "height",
+                                                "150px",
+                                                editor.editing.view.document.getRoot()
+                                             );
+                                          });
+                                       }}
+                                       onChange={(event, editor) => {
+                                          onCkChange(setFieldValue, event, editor);
+                                       }}
+                                    >
+                                       <Field
+                                          as="textarea"
+                                          name="story"
+                                          className="form-control"
+                                          placeholder="type here..."
+                                          rows="4"
+                                       />
+                                    </CKEditor>
+                                    <ErrorMessage
+                                       name="story"
+                                       component="div"
+                                       className="has-error text-danger"
+                                    />
+                                 </div>
+
+                                 <div
+                                    className="form-group mb-3"
+                                    data={formInfo.fileIds}
+                                 >
+                                    <div className="col">
+                                       {formInfo.fileIds.length > 0 &&
+                                          renderImage(values)}
+                                       {formInfo.fileIds.length === 0 && (
+                                          <FileUpload
+                                             name="imageFile"
+                                             onUploadSuccess={(files) => {
+                                                onSubmitHandler(files, setFieldValue);
+                                             }}
+                                          />
+                                       )}
+                                    </div>
+                                 </div>
+
+                                 <div className="mb-3 ms-2 px-2 float-right">
+                                    <button
+                                       type="submit"
+                                       id="submit"
+                                       className="btn btn-primary float-end rounded ms-2"
+                                    >
+                                       Submit
+                                    </button>
+                                 </div>
+                              </Card.Body>
+                           </Card>
+                        </Form>
+                     )}
+                  </Formik>
+               </div>
+            </div>
+            <div className="bg-lg-light-success">
+               <hr className="my-10 my-lg-8" />
+               <TestimonialSection user={props} />
+            </div>
+            <div className="d-flex justify-content-center">
+               {user.includes("User") && (
+                  <div className="mt-3">
+                     <div className="row">
+                        <div className="col">
+                           <ShareStoryForm user={props} />
+                        </div>
+                     </div>
+                  </div>
+               )}
+               {user.includes("Admin") && (
+                  <div className="mt-3">
+                     <div className="row">
+                        <div className="col">
+                           <ShareStoryForm user={props} />
+                        </div>
+                     </div>
+                  </div>
+               )}
+            </div>
+         </div>
+      </React.Fragment>
+   );
+};
+
+ShareStory.propTypes = {
+   currentUser: PropTypes.shape({
+      roles: PropTypes.arrayOf(PropTypes.string).isRequired,
+   }).isRequired,
+};
+ShareStoryForm.propTypes = {
+   user: PropTypes.shape({
+      currentUser: PropTypes.shape({
+         roles: PropTypes.arrayOf(PropTypes.string).isRequired,
+      }).isRequired,
+   }).isRequired,
+};
+
+export default ShareStory;
