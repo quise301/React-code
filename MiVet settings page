@@ -1,0 +1,147 @@
+import React, { useState } from "react";
+import { Row, Col } from "react-bootstrap";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import netUserService from "services/userService";
+import toastr from "toastr";
+import { settingsFormSchema } from "schemas/settingsFormSchema";
+import PropTypes from "prop-types";
+
+function SettingsForm(props) {
+   const [loginUser] = useState({
+      title: "",
+      avatarUrl: "",
+      mi: "",
+      firstName: "",
+      lastName: "",
+   });
+   const onSubmitClick = (values) => {
+      const payload = { ...values };
+      payload.id = props.currentUser.id;
+      netUserService
+         .updateUser(props.currentUser.id, payload)
+         .then(onGetCurrUserSuccess)
+         .catch(onGetCurrUserError);
+   };
+
+   const onGetCurrUserSuccess = (response) => {
+      toastr.success("Settings changed", response);
+   };
+   const onGetCurrUserError = (error) => {
+      toastr.error("settings changed failed", error);
+   };
+   return (
+      <React.Fragment>
+         <Formik
+            initialValues={loginUser}
+            enableReinitialize={true}
+            onSubmit={onSubmitClick}
+            validationSchema={settingsFormSchema}
+         >
+            <Form>
+               <Row>
+                  <Col>
+                     <label htmlFor="title">
+                        Title
+                        <ErrorMessage
+                           name="title"
+                           component={"span"}
+                           className="text-danger"
+                        />
+                     </label>
+                     <Field
+                        type="text"
+                        name="title"
+                        placeholder="Enter the Title"
+                        className="form-control"
+                        autoComplete="title"
+                        style={{ width: "18rem" }}
+                     />
+
+                     <label htmlFor="firstname">
+                        First Name
+                        <ErrorMessage
+                           name="firstName"
+                           component={"span"}
+                           className="text-danger"
+                        />
+                     </label>
+                     <Field
+                        type="text"
+                        name="firstName"
+                        placeholder="Enter your first name"
+                        className="form-control"
+                        autoComplete="firstName"
+                        style={{ width: "18rem" }}
+                     />
+
+                     <label htmlFor="mi">
+                        Middle Name
+                        <ErrorMessage
+                           name="mi"
+                           component={"span"}
+                           className="text-danger"
+                        />
+                     </label>
+                     <Field
+                        type="text"
+                        name="mi"
+                        placeholder="Enter your middle name"
+                        className="form-control"
+                        autoComplete="mi"
+                        style={{ width: "18rem" }}
+                     />
+
+                     <label htmlFor="lastName">
+                        Last Name
+                        <ErrorMessage
+                           name="lastName"
+                           component={"span"}
+                           className="text-danger"
+                        />
+                     </label>
+                     <Field
+                        type="text"
+                        name="lastName"
+                        placeholder="Enter your last name"
+                        className="form-control"
+                        autoComplete="lastName"
+                        style={{ width: "18rem" }}
+                     />
+                     <label htmlFor="avatarUrl">
+                        Avatar Url
+                        <ErrorMessage
+                           name="avatarUrl"
+                           component={"span"}
+                           className="text-danger"
+                        />
+                     </label>
+                     <Field
+                        type="text"
+                        name="avatarUrl"
+                        placeholder="https://..."
+                        className="form-control"
+                        autoComplete="avatarUrl"
+                        style={{ width: "21rem" }}
+                     />
+                     <button
+                        type="submit"
+                        id="submit"
+                        className="btn btn-primary mt-3"
+                     >
+                        Confirm
+                     </button>
+                  </Col>
+               </Row>
+            </Form>
+         </Formik>
+      </React.Fragment>
+   );
+}
+
+SettingsForm.propTypes = {
+   currentUser: PropTypes.shape({
+      id: PropTypes.number,
+   }),
+};
+
+export default SettingsForm;
